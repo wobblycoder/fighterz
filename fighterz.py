@@ -6,10 +6,15 @@
 # wobblycoder@gmail.com
 #
 
+import configparser
+import glob
+import os
+
 from world import World
 
 # from fighter import Fighter
 from fighter_v3 import Fighter
+from artwork import Artwork
 import pygame
 import demos
 
@@ -21,45 +26,43 @@ RED   = (192, 0, 0, 128)
 BLUE  = (0, 0, 192, 128)
 
 class FighterzGame:
-    def __init__(self, width=1920, height=1080, scale=1.0):
+
+    def __init__(self):
+        self.readConfiguration()
+        self.initializeGameEngine()
+        self.loadGraphics()
+        self.createGameWorld()
+        
+        
+    def readConfiguration(self):
+        # set defaults
+        self.drawSensorsFlag = False
+        self.screenSize = [1024, 768]
+
+        # TODO : read the config file
+        
+
+    
+    def initializeGameEngine(self):
         pygame.init()
-
-        self.screenSize = [width, height]
-
         self.screen = pygame.display.set_mode(self.screenSize, pygame.FULLSCREEN)
-
         pygame.display.set_caption('Fighters!')
 
-        # Load and set up graphics.
-        self.art = {
-            "background": pygame.transform.scale(pygame.image.load("art/desert-background.png").convert(),
-                                                 self.screenSize),
-            "bluefighter": pygame.transform.scale(pygame.image.load("art/Blue Fighter 64px.png").convert(),
-                                                  [int(64 * scale), int(64 * scale)]),
-            "redfighter": pygame.transform.scale(pygame.image.load("art/Red Fighter 64px.png").convert(),
-                                                 [int(64 * scale), int(64 * scale)]),
-            "redmissile": pygame.transform.scale(pygame.image.load("art/Red Missile.png").convert(),
-                                                 [int(64 * scale), int(64 * scale)]),
-            "bluemissile": pygame.transform.scale(pygame.image.load("art/Blue Missile.png").convert(),
-                                                 [int(64 * scale), int(64 * scale)])
-        }
+    
+    def loadGraphics(self):
+        pass
+        # TODO: load and scale the images in the config file
+    
 
-        for eNum in range(0,9):
-            suffix = "{0:02d}".format(eNum)
-            shortname = "explosion" + str(eNum)
-            pathname = "art/explosion" + suffix + ".png"
-            self.art[shortname] = pygame.transform.scale(pygame.image.load(pathname).convert(),
-                                                 [int(64 * scale), int(64 * scale)])
-
-        for image in self.art:
-            if image != "background":
-                self.art[image].set_colorkey(BLACK)
-
-        self.drawSensorsFlag = False
-
+    
+    def createGameWorld(self):
         maxWorldX = 1000.0
         maxWorldY = maxWorldX * self.screenSize[1] / self.screenSize[0]
         self.world = World([maxWorldX, maxWorldY])
+        
+        
+    
+        
 
     def drawExplosion(self, explosion):
         imageName = "explosion" + str(explosion["phase"] % 9)
@@ -152,6 +155,30 @@ class FighterzGame:
             ticks = clock.tick(50)
 
         pygame.quit()
+        
+    def setupGraphics(self):
+
+        icons = {
+            "bluefighter" : "art/Blue Fighter 64px.png"
+            "redfighter" : "art/Red Fighter 64px.png"
+            "redmissile" : "art/Red Missile.png"
+            "bluemissile" : "art/Blue Missile.png"
+        }
+        
+        for eNum in range(0,9):
+            suffix = "{0:02d}".format(eNum)
+            shortname = "explosion" + str(eNum)
+            pathname = "art/explosion" + suffix + ".png"
+            icons[shortname] = pathname
+        
+
+        self.art = Artwork()
+        self.art.addImagery(
+            assets = icons,
+            background = "art/desert-background.png",
+        )
+
+        pass
 
 
 game = FighterzGame(1920, 1080, 0.8)
