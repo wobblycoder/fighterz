@@ -1,4 +1,6 @@
 from fighter_v3 import Fighter
+from colors import *
+
 import random
 
 def makeFighter(world, force):
@@ -6,7 +8,7 @@ def makeFighter(world, force):
     y = random.randint(int(0.8 * world.minY), int(0.8 * world.maxY))
     p.setSpeed(100)
 
-    if force == "blue":
+    if force == BLUE:
         x = random.randint(world.minX + 64, world.minX * 0.8)
         hdg = random.randint(-15, 15)
         p.turnRate = 120.0
@@ -32,15 +34,15 @@ def makeFighter(world, force):
 def ManyVsMany(world, perSide=20):
 
     for redCount in range(perSide):
-        world.addPlayer(makeFighter(world, "red"))
+        world.addPlayer(makeFighter(world, RED))
 
     for blueCount in range(perSide):
-        world.addPlayer(makeFighter(world, "blue"))
+        world.addPlayer(makeFighter(world, BLUE))
 
 def HeadingTest(world):
     x = -900
     for h in range(0,360,15):
-        p = Fighter("blue")
+        p = Fighter(BLUE)
         p.setPosition(x=x, y=0)
         p.setSpeed(200)
         p.setHeading(h)
@@ -50,14 +52,14 @@ def HeadingTest(world):
         world.addPlayer(p)
 
 def OneOnOnePursuit(world):
-    p = Fighter("blue")
+    p = Fighter(BLUE)
     p.setPosition(-900.0, 0)
     p.setSpeed(100)
     p.setHeading(0)
     p.addSensor(1.0, 600.0, "fighter", 1.0)
     # p.addWeaponLoadout(1, 500, 120)
 
-    q = Fighter("red")
+    q = Fighter(RED)
     q.setPosition(900,0)
     q.setHeading(180)
     q.setSpeed(100)
@@ -69,12 +71,12 @@ def OneOnOnePursuit(world):
 def SpeedTest(world):
 
     for y in range(0,700):
-        p = Fighter("blue")
+        p = Fighter(BLUE)
         p.setPosition(-1000.0, y)
         p.setSpeed(y)
         p.setHeading(0)
 
-        q = Fighter("blue")
+        q = Fighter(BLUE)
         q.setPosition(-1000.0, -y)
         q.setSpeed(y)
         q.setHeading(0)

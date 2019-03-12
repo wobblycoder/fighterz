@@ -11,6 +11,7 @@ class Fighter:
 
         self.entityType = "fighter"
         self.force = force
+        
         self.playerId = None
 
         self.world = None
