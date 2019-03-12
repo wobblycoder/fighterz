@@ -6,6 +6,8 @@ from missile import Missile
 from sensor import Sensor
 
 class Fighter:
+    
+    imagesByForce = dict()
 
     def __init__(self, force):
 
@@ -15,6 +17,8 @@ class Fighter:
         self.playerId = None
 
         self.world = None
+
+        self.image = Fighter.imagesByForce[force]
 
         self.state = "ALIVE"
         self.mode = "SEARCH"  # or PURSUIT, or FIRE
@@ -43,6 +47,7 @@ class Fighter:
         self.elapsedPursuitTime = 0.0
         self.pursuitTime = 5.0
         self.pursuitRange = 2000.0
+
 
     def doSearch(self, dt):
 

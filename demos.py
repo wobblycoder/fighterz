@@ -84,3 +84,35 @@ def SpeedTest(world):
         world.addPlayer(p)
         world.addPlayer(q)
 
+
+def FireHeadingTest(world):
+    p = Fighter(BLUE)
+    p.setPosition(x=50, y=0)
+    p.setSpeed(0)
+    p.setHeading(0)
+    p.detectRange = 250
+    p.pDetect = 1.0
+    p.addSensor(0.25, 750.0, "fighter", 0.75)
+    p.addWeaponLoadout(6,250,250)
+    
+    p2 = Fighter(RED)
+    p2.setPosition(x=150, y=0)
+    p2.setSpeed(0)
+    p2.setHeading(180)
+    p2.detectRange = 250
+    p2.pDetect = 1.0
+    p2.addSensor(0.25, 750.0, "fighter", 0.75)
+    p2.addWeaponLoadout(6,250,250)
+
+    
+    world.addPlayer(p)
+    world.addPlayer(p2)
+    
+    
+    
+    
+
+
+
+
+

@@ -7,13 +7,12 @@
 #
 
 import configparser
-import glob
-import os
 import pygame
 
 from artwork import Artwork
-from colors import *
+from colors import RED, BLUE
 from fighter_v3 import Fighter
+from missile import Missile
 from world import World
 
 import demos
@@ -33,14 +32,18 @@ class FighterzGame:
         clock = pygame.time.Clock()
 
         self.done = False
+        
         while not self.done:
+        
             self.handleEvents()
             self.drawBackground()
             self.drawFighters()
             self.drawMissiles()
             self.drawExplosions()
             self.world.update(ticks/1000.0)
+            
             pygame.display.flip()
+            
             ticks = clock.tick(50)
 
         pygame.quit()
@@ -69,6 +72,7 @@ class FighterzGame:
         
         if self.config.has_option("Screen", "iconScale"):
             self.iconScale = self.config.getfloat("Screen", "iconScale")
+            print(self.iconScale)
         
     
     def loadOptions(self):
@@ -105,13 +109,25 @@ class FighterzGame:
             icons[shortname] = pathname
         
 
-        self.art = Artwork()
+        self.art = Artwork(scale=self.iconScale, 
+                           screenWidth=self.screenSize[0], 
+                           screenHeight=self.screenSize[1])
         
         for graphicName, graphicPath in icons.items():
             self.art.loadImage(graphicName, graphicPath)
 
         self.art.loadBackground("background", "art/desert-background.png")    
-
+        
+        Fighter.imagesByForce = {
+            BLUE : self.art.assets["bluefighter"],
+            RED : self.art.assets["redfighter"]
+        }
+            
+        Missile.imagesByForce = {
+            BLUE : self.art.assets["bluemissile"],
+            RED : self.art.assets["redmissile"]
+        }
+            
     
     def createGameWorld(self):
         maxWorldX = 1000.0
@@ -162,12 +178,7 @@ class FighterzGame:
         self.screen.blit(image, [blitx, blity])
 
     def drawPlayer(self, player):
-        if player.force == BLUE:
-            imageName = "blue" + player.entityType
-        else:
-            imageName = "red" + player.entityType
-            
-        image = self.art.assets[imageName]
+        image = player.image
         px, py = self.translateWorldToScreenCoordinates(player.x, player.y)
         blitx = px - image.get_width() / 2
         blity = py - image.get_height() / 2
@@ -210,7 +221,8 @@ game = FighterzGame()
 #demos.OneOnOnePursuit(game.world)
 #demos.SpeedTest(game.world)
 #demos.HeadingTest(game.world)
-demos.ManyVsMany(game.world, 30)
 
+demos.FireHeadingTest(game.world)
+# demos.ManyVsMany(game.world, 30)
 
 game.mainloop()

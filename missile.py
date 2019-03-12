@@ -2,9 +2,13 @@ import math
 import utils
 
 class Missile:
+    
+    imagesByForce = dict()
+    
     def __init__(self, force, shooter, target, speed):
         self.force = force
         self.entityType = "missile"
+        self.image = Missile.imagesByForce[force]
         self.playerId = None
         self.x = shooter.x
         self.y = shooter.y
@@ -17,6 +21,7 @@ class Missile:
         self.ttl = 12 # seconds
         self.runTime = 0.0
         self.state = "ALIVE"
+
 
     def setHeading(self, angle):
         self.heading = angle

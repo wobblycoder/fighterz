@@ -2,6 +2,8 @@
 import random
 import utils
 
+from colors import RED, BLUE
+
 class Sensor:
     def __init__(self, world, parentId, sweepTime, detectionRange, entityTypeFilter, pDetect, myForce):
         self.world = world
@@ -16,7 +18,7 @@ class Sensor:
     def update(self, parent, dt):
 
         searchResults = list()
-
+        
         self.elapsedTime += dt
 
         if self.elapsedTime > self.baseSweepTime:
@@ -24,6 +26,9 @@ class Sensor:
             possibleTargets = self.world.findPlayersInRange(parent, self.detectionRange)
 
             for target in possibleTargets:
+                if parent.force == RED:
+                    print(target)
+                
                 if target.entityType == self.entityTypeFilter and target.force != self.myForce:
                     diceRoll = random.random()
                     searchResults.append({
@@ -35,6 +40,7 @@ class Sensor:
                         "pDetect" : self.pDetect,
                         "detected" : random.random() < self.pDetect
                     })
+    
 
             self.elapsedTime = 0.0
 
