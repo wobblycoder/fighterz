@@ -22,20 +22,18 @@ def makeFighter(world, force):
     else:
         x = random.randint(world.maxX * 0.8, world.maxX - 64)
         hdg = random.randint(180 - 15, 180 + 15)
-        p.turnRate = 60.0
+        p.turnRate = 120.0
         p.addSensor(0.25, 750.0, "fighter", 0.75)
-        p.addWeaponLoadout(6,250,250)
+        p.addWeaponLoadout(qty=12, rng=350, spd=250)
 
     p.setPosition(x, y)
     p.setHeading(hdg)
 
     return p
 
-def ManyVsMany(world, perSide=20):
-
+def ManyVsMany(world, perSide=10):
     for redCount in range(perSide):
         world.addPlayer(makeFighter(world, RED))
-
     for blueCount in range(perSide):
         world.addPlayer(makeFighter(world, BLUE))
 
@@ -93,7 +91,7 @@ def FireHeadingTest(world):
     p.detectRange = 250
     p.pDetect = 1.0
     p.addSensor(0.25, 750.0, "fighter", 0.75)
-    p.addWeaponLoadout(6,250,250)
+    # p.addWeaponLoadout(6,250,250)
     
     p2 = Fighter(RED)
     p2.setPosition(x=150, y=0)

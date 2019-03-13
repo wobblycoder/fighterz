@@ -20,6 +20,8 @@ import demos
 class FighterzGame:
 
     def __init__(self):
+        self.config = configparser.ConfigParser()
+
         self.readConfiguration()
         self.initializeGameEngine()
         self.loadGraphics()
@@ -50,7 +52,6 @@ class FighterzGame:
         
     
     def readConfiguration(self):
-        self.config = configparser.ConfigParser()
         self.config.read("fighterz.cfg")
         self.loadScreenSettings()
         self.loadOptions()
@@ -221,8 +222,8 @@ game = FighterzGame()
 #demos.OneOnOnePursuit(game.world)
 #demos.SpeedTest(game.world)
 #demos.HeadingTest(game.world)
+#demos.FireHeadingTest(game.world)
 
-demos.FireHeadingTest(game.world)
-# demos.ManyVsMany(game.world, 30)
+demos.ManyVsMany(game.world, 20)
 
 game.mainloop()

@@ -16,19 +16,11 @@ class Sensor:
         self.elapsedTime = sweepTime # force a detection on first update
 
     def update(self, parent, dt):
-
         searchResults = list()
-        
         self.elapsedTime += dt
-
         if self.elapsedTime > self.baseSweepTime:
-
             possibleTargets = self.world.findPlayersInRange(parent, self.detectionRange)
-
             for target in possibleTargets:
-                if parent.force == RED:
-                    print(target)
-                
                 if target.entityType == self.entityTypeFilter and target.force != self.myForce:
                     diceRoll = random.random()
                     searchResults.append({
@@ -40,8 +32,5 @@ class Sensor:
                         "pDetect" : self.pDetect,
                         "detected" : random.random() < self.pDetect
                     })
-    
-
             self.elapsedTime = 0.0
-
         return searchResults
