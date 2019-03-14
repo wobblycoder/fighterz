@@ -97,31 +97,19 @@ class FighterzGame:
 
     
     def loadGraphics(self):
-        print(self.config.items("Icons"))
-
-        icons = {
-            "bluefighter" : "art/Blue Fighter 64px.png",
-            "redfighter" : "art/Red Fighter 64px.png",
-            "redmissile" : "art/Red Missile.png",
-            "bluemissile" : "art/Blue Missile.png"
-        }
-        
-        for eNum in range(0,9):
-            suffix = "{0:02d}".format(eNum)
-            shortname = "explosion" + str(eNum)
-            pathname = "art/explosion" + suffix + ".png"
-            icons[shortname] = pathname
-        
-
-        self.art = Artwork(scale=self.iconScale, 
-                           screenWidth=self.screenSize[0], 
+        self.art = Artwork(scale=self.iconScale,
+                           screenWidth=self.screenSize[0],
                            screenHeight=self.screenSize[1])
-        
-        for graphicName, graphicPath in icons.items():
-            self.art.loadImage(graphicName, graphicPath)
 
-        self.art.loadBackground("background", "art/desert-background.png")    
-        
+        icons = self.config.items("Icons")
+
+        for icon in icons:
+            self.art.loadImage(icon[0], icon[1])
+
+        backgrounds = self.config.items("Backgrounds")
+        chosen_background = self.config.get("Backgrounds", "choice")
+        self.art.loadBackground("background", self.config.get("Backgrounds", chosen_background))
+
         Fighter.imagesByForce = {
             BLUE : self.art.assets["bluefighter"],
             RED : self.art.assets["redfighter"]
