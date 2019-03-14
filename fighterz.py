@@ -21,6 +21,13 @@ class FighterzGame:
 
     def __init__(self):
         self.config = configparser.ConfigParser()
+        self.done = False
+        self.drawSensors = False
+        self.fullScreen = False
+        self.iconScale = 1.0
+        self.screen = None
+        self.screenSize = [1024, 786]
+        self.world = None
 
         self.readConfiguration()
         self.initializeGameEngine()
@@ -58,10 +65,6 @@ class FighterzGame:
         
 
     def loadScreenSettings(self):
-        self.screenSize = [1024, 768]
-        self.fullScreen = False
-        self.iconScale = 1.0
-
         if self.config.has_option("Screen", "width"):
             self.screenSize[0] = self.config.getint("Screen", "width")
 
