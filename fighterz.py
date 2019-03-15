@@ -33,6 +33,9 @@ class FighterzGame:
         self.world = None
         self.selectedPlayer = None
 
+        self.initialScore = dict()
+        self.currentScore = dict()
+
         self.readConfiguration()
         self.initializeGameEngine()
         self.loadGraphics()
@@ -47,6 +50,8 @@ class FighterzGame:
     def mainloop(self):
         ticks = 0
         self.clock = pygame.time.Clock()
+        self.initialScore = self.computeScores()
+
         while not self.done:
             self.handleEvents()
             self.drawEverything()
@@ -61,6 +66,7 @@ class FighterzGame:
         self.drawMissiles()
         self.drawExplosions()
         self.drawSelection()
+        self.drawScore()
         pygame.display.flip()
 
     def readConfiguration(self):
@@ -261,6 +267,24 @@ class FighterzGame:
                                2)
 
 
+    def drawScore(self):
+        self.currentScore = self.computeScores()
+
+        redScore = self.currentScore[RED] / self.initialScore[RED]
+        blueScore = self.currentScore[BLUE] / self.initialScore[BLUE]
+
+        pygame.draw.rect(self.screen, (0,0,0,0), (4,4,214,66))
+
+        pygame.draw.rect(self.screen, (225,225,255,255), (10, 10, int(200 * blueScore), 22), 2)
+        pygame.draw.rect(self.screen, (  0,  0,255,255), (12, 12, int(200 * blueScore), 22))
+
+        pygame.draw.rect(self.screen, (225,225,255,255), (10, 38, int(200 * redScore), 22), 2)
+        pygame.draw.rect(self.screen, (255,  0,  0,255), (12, 40, int(200 * redScore), 22))
+
+        #pprint.pprint(self.initialScore)
+        #pprint.pprint(self.currentScore)
+        #print(redScore,blueScore)
+
     def rotateImage(self, image, angle):
         """rotate an image while keeping its center and size"""
         orig_rect = image.get_rect()
@@ -275,6 +299,16 @@ class FighterzGame:
         newX = ((x - self.world.minX) / (self.world.maxX - self.world.minX)) * self.screenSize[0]
         newY = self.screenSize[1] - ((y - self.world.minY) / (self.world.maxY - self.world.minY)) * self.screenSize[1]
         return newX, newY
+
+
+    def computeScores(self):
+        score = { RED : 0, BLUE : 0 }
+        for playerId in self.world.players:
+            p = self.world.players[playerId]
+            if not p.state == "DEAD":
+                score[p.force] += 1
+        return score
+
 
 
 game = FighterzGame()

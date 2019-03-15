@@ -40,7 +40,7 @@ class Missile:
         dy = math.sin(math.radians(self.heading))
         n = utils.normalize2dVector([dx,dy])
 
-        self.speed -= 1
+        # self.speed *= 0.999
 
         self.x += n[0] * float(self.speed) * dt
         self.y += n[1] * float(self.speed) * dt
