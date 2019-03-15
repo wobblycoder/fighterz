@@ -16,11 +16,6 @@ def computeSmallestAngleBetweenHeadings(h1, h2):
 def computeDistance(x1, y1, x2, y2):
     """
     The standard distance formula.
-    :param x1:
-    :param y1:
-    :param x2:
-    :param y2:
-    :return:
     """
     return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
@@ -45,6 +40,7 @@ def normalizeAngle(angle):
 
 def computeRangeToTarget(me, target):
     return computeDistance(me.x, me.y, target.x, target.y)
+
 
 def projectPoint(x, y, hdg, distance):
     x2 = x + distance * math.cos(math.radians(self.heading))

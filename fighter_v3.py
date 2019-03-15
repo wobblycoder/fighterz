@@ -6,6 +6,49 @@ from colors import RED, BLUE
 from missile import Missile
 from sensor import Sensor
 
+def makeDemoFighter(force, options, world):
+
+    f = Fighter(force)
+
+    if force == RED:
+        optionPrefix = "red"
+    elif force == BLUE:
+        optionPrefix = "blue"
+
+    xstr = options.get("Demo", "{0}.x".format(optionPrefix))
+    ystr = options.get("Demo", "{0}.y".format(optionPrefix))
+    ys = sorted([float(y) for y in ystr.split(",")])
+    xs = sorted([float(x) for x in xstr.split(",")])
+
+    y = random.randint(int(world.minY + ys[0] * (world.maxY - world.minY)),
+                       int(world.minY + ys[1] * (world.maxY - world.minY)))
+
+    x = random.randint(int(world.minX + xs[0] * (world.maxX - world.minX)),
+                       int(world.minX + xs[1] * (world.maxX - world.minX)))
+
+    f.setPosition(x,y)
+    f.setSpeed(options.getint("Demo", "{0}.speed".format(optionPrefix)))
+
+    hstr = options.get("Demo", "{0}.heading".format(optionPrefix))
+    hs = sorted([int(h) for h in hstr.split(",")])
+    h = random.randint(int(hs[0]), int(hs[1]))
+
+    f.setHeading(h)
+
+    f.turnRate = options.getint("Demo", "{0}.turnRate".format(optionPrefix))
+
+    f.addSensor(sweepTime=options.getfloat("Demo", "{0}.sensor.sweepTime".format(optionPrefix)),
+                detectionRange=options.getfloat("Demo", "{0}.sensor.detectionRange".format(optionPrefix)),
+                entityTypeFilter="fighter",
+                pDetect=options.getfloat("Demo", "{0}.sensor.pDetect".format(optionPrefix)))
+
+    f.addWeaponLoadout(qty=options.getint("Demo", "{0}.weapon.qty".format(optionPrefix)),
+                       rng=options.getfloat("Demo", "{0}.weapon.rng".format(optionPrefix)),
+                       speed=options.getfloat("Demo", "{0}.weapon.speed".format(optionPrefix)))
+
+    return f
+
+
 class Fighter:
 
     imagesByForce = dict()
@@ -35,6 +78,49 @@ class Fighter:
         self.elapsedPursuitTime = 0.0
         self.pursuitTime = 60.0
         self.pursuitRange = 2000.0
+
+    def update(self, dt):
+        self.updatePosition(dt)
+        self.updateSensors(dt)
+        self.updateTimers(dt)
+        self.doSearch(dt)
+        if self.mode == "PURSUIT":
+            self.doPursuit(dt)
+        if self.mode == "FIRE":
+            self.doFire(dt)
+
+    def updatePosition(self, dt):
+        dx = math.cos(math.radians(self.heading))
+        dy = math.sin(math.radians(self.heading))
+        n = utils.normalize2dVector([dx,dy])
+
+        self.x += n[0] * self.speed * dt
+        self.y += n[1] * self.speed * dt
+
+        if self.commandedHeading is not None:
+            cmdHdgNormalized = utils.normalizeAngle(self.commandedHeading)
+            curHdgNormalized = utils.normalizeAngle(self.heading)
+
+            deltaHeading = utils.computeSmallestAngleBetweenHeadings(curHdgNormalized, cmdHdgNormalized)
+
+            if deltaHeading > self.turnRate * dt:
+                if deltaHeading < 0:
+                    self.setHeading(curHdgNormalized - self.turnRate * dt)
+                else:
+                    self.setHeading(curHdgNormalized + self.turnRate * dt)
+            else:
+                self.commandedHeading = None
+
+    def updateSensors(self, dt):
+        self.searchResults = []
+        for sensor in self.sensors:
+            self.searchResults.extend(sensor.update(parent=self, dt=dt))
+
+    def updateTimers(self, dt):
+        if self.currentShotDelay < dt:
+            self.currentShotDelay = 0
+        else:
+            self.currentShotDelay -= dt
 
     def doSearch(self, dt):
         if len(self.searchResults) != 0:
@@ -120,53 +206,11 @@ class Fighter:
     def addSensor(self, sweepTime, detectionRange, entityTypeFilter, pDetect):
         self.sensors.append(Sensor(self.world, self.playerId, sweepTime, detectionRange, entityTypeFilter, pDetect, self.force))
 
-    def addWeaponLoadout(self, qty, rng, spd=100):
+    def addWeaponLoadout(self, qty, rng, speed=100):
         self.shotsAvailable = qty
         self.shotRange = rng
-        self.shotSpeed = spd
+        self.shotSpeed = speed
 
     def setSpeed(self, speed):
         self.speed = speed
 
-    def updatePosition(self, dt):
-        dx = math.cos(math.radians(self.heading))
-        dy = math.sin(math.radians(self.heading))
-        n = utils.normalize2dVector([dx,dy])
-
-        self.x += n[0] * self.speed * dt
-        self.y += n[1] * self.speed * dt
-
-        if self.commandedHeading is not None:
-            cmdHdgNormalized = utils.normalizeAngle(self.commandedHeading)
-            curHdgNormalized = utils.normalizeAngle(self.heading)
-
-            deltaHeading = utils.computeSmallestAngleBetweenHeadings(curHdgNormalized, cmdHdgNormalized)
-
-            if deltaHeading > self.turnRate * dt:
-                if deltaHeading < 0:
-                    self.setHeading(curHdgNormalized - self.turnRate * dt)
-                else:
-                    self.setHeading(curHdgNormalized + self.turnRate * dt)
-            else:
-                self.commandedHeading = None
-
-    def updateSensors(self, dt):
-        self.searchResults = []
-        for sensor in self.sensors:
-            self.searchResults.extend(sensor.update(parent=self, dt=dt))
-
-    def updateTimers(self, dt):
-        if self.currentShotDelay < dt:
-            self.currentShotDelay = 0
-        else:
-            self.currentShotDelay -= dt
-
-    def update(self, dt):
-        self.updatePosition(dt)
-        self.updateSensors(dt)
-        self.updateTimers(dt)
-        self.doSearch(dt)
-        if self.mode == "PURSUIT":
-            self.doPursuit(dt)
-        if self.mode == "FIRE":
-            self.doFire(dt)

@@ -18,7 +18,7 @@ class Missile:
         self.speed = speed
         self.target = target
         self.detections = []
-        self.ttl = 12 # seconds
+        self.ttl = 6 # seconds
         self.runTime = 0.0
         self.state = "ALIVE"
 
@@ -27,7 +27,6 @@ class Missile:
         self.heading = angle
 
     def update(self, dt):
-        #print("missile {1} dt = {0}".format(dt, self))
         if self.state == "DEAD":
             return
 
@@ -41,13 +40,10 @@ class Missile:
         dy = math.sin(math.radians(self.heading))
         n = utils.normalize2dVector([dx,dy])
 
-        #print("x={0} y={1} speed={2}".format(self.x, self.y, self.speed))
-        #print("dx={0} dy={1} n = [{2},{3}]".format(dx, dy, n[0], n[1]))
+        self.speed -= 1
 
         self.x += n[0] * float(self.speed) * dt
         self.y += n[1] * float(self.speed) * dt
-
-        #print("new x={0} y={1} speed={2}".format(self.x, self.y, self.speed))
 
         # should I turn toward my target?
         if self.target.state == "DEAD":

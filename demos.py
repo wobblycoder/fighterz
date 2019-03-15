@@ -3,40 +3,6 @@ from colors import *
 
 import random
 
-def makeFighter(world, force):
-    p = Fighter(force)
-    y = random.randint(int(0.8 * world.minY), int(0.8 * world.maxY))
-    p.setSpeed(100)
-
-    if force == BLUE:
-        x = random.randint(world.minX + 64, world.minX * 0.8)
-        hdg = random.randint(-15, 15)
-        p.turnRate = 120.0
-        p.addSensor(sweepTime=0.25,
-                    detectionRange=750.0,
-                    entityTypeFilter="fighter",
-                    pDetect=0.75)
-
-        p.addWeaponLoadout(qty=12, rng=350, spd=250)
-
-    else:
-        x = random.randint(world.maxX * 0.8, world.maxX - 64)
-        hdg = random.randint(180 - 15, 180 + 15)
-        p.turnRate = 120.0
-        p.addSensor(0.25, 750.0, "fighter", 0.75)
-        p.addWeaponLoadout(qty=12, rng=350, spd=250)
-
-    p.setPosition(x, y)
-    p.setHeading(hdg)
-
-    return p
-
-def ManyVsMany(world, perSide=10):
-    for redCount in range(perSide):
-        world.addPlayer(makeFighter(world, RED))
-    for blueCount in range(perSide):
-        world.addPlayer(makeFighter(world, BLUE))
-
 def HeadingTest(world):
     x = -900
     for h in range(0,360,15):

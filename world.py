@@ -32,6 +32,13 @@ class World:
         self.playerId += 1
         p.setWorld(self)
 
+    def addPlayers(self, players):
+        for player in players:
+            self.players[self.playerId] = player
+            player.playerId = self.playerId
+            self.playerId += 1
+            player.setWorld(self)
+
     def addWeapon(self, missile):
         self.weapons[self.weaponId] = missile
         missile.playerId = self.weaponId

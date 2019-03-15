@@ -7,12 +7,14 @@
 #
 
 import configparser
+import pprint
 import pygame
 
 from artwork import Artwork
 from colors import RED, BLUE
-from fighter_v3 import Fighter
+from fighter_v3 import Fighter, makeDemoFighter
 from missile import Missile
+import utils
 from world import World
 
 import demos
@@ -22,42 +24,42 @@ class FighterzGame:
     def __init__(self):
         self.config = configparser.ConfigParser()
         self.done = False
+        self.paused = False
         self.drawSensors = False
         self.fullScreen = False
         self.iconScale = 1.0
         self.screen = None
         self.screenSize = [1024, 786]
         self.world = None
+        self.selectedPlayer = None
 
         self.readConfiguration()
         self.initializeGameEngine()
         self.loadGraphics()
         self.createGameWorld()
 
+        self.setupDemo()
+
 
     def mainloop(self):
-
         ticks = 0
-        clock = pygame.time.Clock()
-
-        self.done = False
-        
+        self.clock = pygame.time.Clock()
         while not self.done:
-        
             self.handleEvents()
-            self.drawBackground()
-            self.drawFighters()
-            self.drawMissiles()
-            self.drawExplosions()
-            self.world.update(ticks/1000.0)
-            
-            pygame.display.flip()
-            
-            ticks = clock.tick(50)
-
+            self.drawEverything()
+            if not self.paused:
+                self.world.update(ticks/1000.0)
+                ticks = self.clock.tick(50)
         pygame.quit()
-        
-    
+
+    def drawEverything(self):
+        self.drawBackground()
+        self.drawFighters()
+        self.drawMissiles()
+        self.drawExplosions()
+        self.drawSelection()
+        pygame.display.flip()
+
     def readConfiguration(self):
         self.config.read("fighterz.cfg")
         self.loadScreenSettings()
@@ -125,17 +127,61 @@ class FighterzGame:
         maxWorldX = 1000.0
         maxWorldY = maxWorldX * self.screenSize[1] / self.screenSize[0]
         self.world = World([maxWorldX, maxWorldY])
-        
-        
+
+    def setupDemo(self):
+
+        if (self.config.has_option("Demo", "enabled") and
+            self.config.getboolean("Demo", "enabled")):
+
+            redQty = self.config.getint("Demo", "red.qty")
+            blueQty = self.config.getint("Demo", "blue.qty")
+
+            for i in range(redQty):
+                rf = makeDemoFighter(RED, self.config, self.world)
+                self.world.addPlayer(rf)
+
+            for j in range(blueQty):
+                bf = makeDemoFighter(BLUE, self.config, self.world)
+                self.world.addPlayer(bf)
+
     def handleEvents(self):
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.MOUSEBUTTONUP:
+                self.selectedPlayer = self.findNearestPlayer(event.pos)
+            elif event.type == pygame.QUIT:
                 self.done = True
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
                     self.done = True
                 if event.key == pygame.K_s:
                     self.drawSensors = not self.drawSensors
+                if event.key in [pygame.K_p, pygame.K_SPACE]:
+                    self.paused = not self.paused
+                    if not self.paused:
+                        self.clock = pygame.time.Clock()
+
+
+    def findNearestPlayer(self, eventPos):
+
+        ids = list(self.world.players.keys())
+        p1 = self.world.players[ids[0]]
+        sx, sy = self.translateWorldToScreenCoordinates(p1.x, p1.y)
+        nearestDistance = utils.computeDistance(eventPos[0], eventPos[1], sx, sy)
+        closest = p1
+
+        for playerId in ids[1:]:
+            p = self.world.players[playerId]
+            sx, sy = self.translateWorldToScreenCoordinates(p.x, p.y)
+            d = utils.computeDistance(eventPos[0], eventPos[1], sx, sy)
+            if d < nearestDistance:
+                closest = p
+                nearestDistance = d
+
+        if nearestDistance < 64 and closest.state != "DEAD":
+            return closest
+
+        return None
+
 
     def drawBackground(self):
         self.screen.blit(self.art.assets["background"], [0, 0])
@@ -169,6 +215,7 @@ class FighterzGame:
         blity = py - image.get_height() / 2
         self.screen.blit(image, [blitx, blity])
 
+
     def drawPlayer(self, player):
         image = player.image
         px, py = self.translateWorldToScreenCoordinates(player.x, player.y)
@@ -185,8 +232,25 @@ class FighterzGame:
 
                         pygame.draw.line(self.screen, player.force, [px, py+1], [dx, dy+1], 5)
 
+
         rotatedImage = self.rotateImage(image, player.heading)
         self.screen.blit(rotatedImage, [blitx, blity])
+
+
+    def drawSelection(self):
+        if self.selectedPlayer is not None and self.selectedPlayer.state != "ALIVE":
+            self.selectedPlayer = None
+            return
+
+        if self.selectedPlayer is not None:
+            px, py = self.translateWorldToScreenCoordinates(self.selectedPlayer.x, self.selectedPlayer.y)
+            pygame.draw.circle(self.screen,
+                               (0,255,0,128),
+                               (int(px), int(py)),
+                               int(self.selectedPlayer.image.get_width()/2),
+                               2)
+
+
 
 
     def rotateImage(self, image, angle):
@@ -205,16 +269,5 @@ class FighterzGame:
         return newX, newY
 
 
-
-        
-        
 game = FighterzGame()
-
-#demos.OneOnOnePursuit(game.world)
-#demos.SpeedTest(game.world)
-#demos.HeadingTest(game.world)
-#demos.FireHeadingTest(game.world)
-
-demos.ManyVsMany(game.world, 20)
-
 game.mainloop()
