@@ -9,15 +9,15 @@
 import configparser
 import pprint
 import pygame
+import sys
 
 from artwork import Artwork
 from colors import RED, BLUE
 from fighter_v3 import Fighter, makeDemoFighter
 from missile import Missile
+import tests
 import utils
 from world import World
-
-import demos
 
 class FighterzGame:
 
@@ -38,7 +38,10 @@ class FighterzGame:
         self.loadGraphics()
         self.createGameWorld()
 
-        self.setupDemo()
+        if len(sys.argv) > 1:
+            self.setupTest()
+        else:
+            self.setupDemo()
 
 
     def mainloop(self):
@@ -143,6 +146,13 @@ class FighterzGame:
             for j in range(blueQty):
                 bf = makeDemoFighter(BLUE, self.config, self.world)
                 self.world.addPlayer(bf)
+
+    def setupTest(self):
+        try:
+            testFunction = getattr(tests, sys.argv[-1])
+            self.world.addPlayers(testFunction())
+        except:
+            pass
 
     def handleEvents(self):
         for event in pygame.event.get():
@@ -249,8 +259,6 @@ class FighterzGame:
                                (int(px), int(py)),
                                int(self.selectedPlayer.image.get_width()/2),
                                2)
-
-
 
 
     def rotateImage(self, image, angle):

@@ -2,8 +2,6 @@
 import random
 import utils
 
-from colors import RED, BLUE
-
 class Sensor:
     def __init__(self, world, parentId, sweepTime, detectionRange, entityTypeFilter, pDetect, myForce):
         self.world = world
