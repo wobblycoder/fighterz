@@ -26,12 +26,14 @@ class FighterzGame:
         self.done = False
         self.paused = False
         self.drawSensors = False
+        self.showPlatformInfo = False
         self.fullScreen = False
         self.iconScale = 1.0
         self.screen = None
         self.screenSize = [1024, 786]
         self.world = None
         self.selectedPlayer = None
+        self.selectedId = None
 
         self.initialScore = dict()
         self.currentScore = dict()
@@ -67,6 +69,8 @@ class FighterzGame:
         self.drawExplosions()
         self.drawSelection()
         self.drawScore()
+        if self.showPlatformInfo:
+            self.drawPlatformInfoPanel()
         pygame.display.flip()
 
     def readConfiguration(self):
@@ -163,7 +167,7 @@ class FighterzGame:
     def handleEvents(self):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONUP:
-                self.selectedPlayer = self.findNearestPlayer(event.pos)
+                self.selectedPlayer, self.selectedId = self.findNearestPlayer(event.pos)
             elif event.type == pygame.QUIT:
                 self.done = True
             elif event.type == pygame.KEYDOWN:
@@ -175,6 +179,8 @@ class FighterzGame:
                     self.paused = not self.paused
                     if not self.paused:
                         self.clock = pygame.time.Clock()
+                if event.key == pygame.K_i:
+                    self.showPlatformInfo = not self.showPlatformInfo
 
 
     def findNearestPlayer(self, eventPos):
@@ -184,6 +190,7 @@ class FighterzGame:
         sx, sy = self.translateWorldToScreenCoordinates(p1.x, p1.y)
         nearestDistance = utils.computeDistance(eventPos[0], eventPos[1], sx, sy)
         closest = p1
+        closestId = ids[0]
 
         for playerId in ids[1:]:
             p = self.world.players[playerId]
@@ -191,10 +198,11 @@ class FighterzGame:
             d = utils.computeDistance(eventPos[0], eventPos[1], sx, sy)
             if d < nearestDistance:
                 closest = p
+                closestId = playerId
                 nearestDistance = d
 
         if nearestDistance < 64 and closest.state != "DEAD":
-            return closest
+            return closest, closestId
 
         return None
 
@@ -284,6 +292,40 @@ class FighterzGame:
         #pprint.pprint(self.initialScore)
         #pprint.pprint(self.currentScore)
         #print(redScore,blueScore)
+
+    def drawPlatformInfoPanel(self):
+
+        pygame.draw.rect(self.screen, (224, 224, 224, 64), (4, 80, 400, 272))
+        pygame.draw.rect(self.screen, (214, 214, 214, 64), (6, 82, 396, 268))
+        pygame.draw.rect(self.screen, (204, 204, 204, 64), (8, 84, 392, 264))
+        pygame.draw.rect(self.screen, (194, 194, 194, 64), (10, 86, 388, 260))
+        pygame.draw.rect(self.screen, (0, 0, 0, 64), (12, 88, 384, 256), 1)
+
+        font = pygame.font.Font('freesansbold.ttf', 24)
+
+        playerid = "??"
+        if self.selectedPlayer is not None:
+            playerid = str(self.selectedId)
+
+            textSurface = font.render("Player {0}".format(playerid), True, (0,0,0,0))
+            textRect = textSurface.get_rect()
+            textRect.center = (202, 108)
+            self.screen.blit(textSurface, textRect)
+
+            textSurface = font.render("heading {0}".format(int(self.selectedPlayer.heading)), True, (0,0,0,0))
+            textRect = textSurface.get_rect()
+            textRect.center = (202, 144)
+            self.screen.blit(textSurface, textRect)
+
+            textSurface = font.render("speed {0}".format(int(self.selectedPlayer.speed)), True, (0,0,0,0))
+            textRect = textSurface.get_rect()
+            textRect.center = (202, 180)
+            self.screen.blit(textSurface, textRect)
+
+            textSurface = font.render("(x,y) = ({0:.2f},{1:.2f})".format(self.selectedPlayer.x, self.selectedPlayer.y), True, (0,0,0,0))
+            textRect = textSurface.get_rect()
+            textRect.center = (202, 216)
+            self.screen.blit(textSurface, textRect)
 
     def rotateImage(self, image, angle):
         """rotate an image while keeping its center and size"""
