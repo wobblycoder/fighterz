@@ -1,4 +1,4 @@
-from fighter_v3 import Fighter
+from fighter import Fighter
 from colors import *
 
 import random
