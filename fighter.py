@@ -6,6 +6,7 @@ from colors import RED, BLUE
 from missile import Missile
 from sensor import Sensor
 
+
 def makeDemoFighter(force, options, world):
 
     f = Fighter(force)
@@ -26,7 +27,7 @@ def makeDemoFighter(force, options, world):
     x = random.randint(int(world.minX + xs[0] * (world.maxX - world.minX)),
                        int(world.minX + xs[1] * (world.maxX - world.minX)))
 
-    f.setPosition(x,y)
+    f.setPosition(x, y)
     f.setSpeed(options.getint("Demo", "{0}.speed".format(optionPrefix)))
 
     hstr = options.get("Demo", "{0}.heading".format(optionPrefix))
@@ -38,12 +39,14 @@ def makeDemoFighter(force, options, world):
     f.turnRate = options.getint("Demo", "{0}.turnRate".format(optionPrefix))
 
     f.addSensor(sweepTime=options.getfloat("Demo", "{0}.sensor.sweepTime".format(optionPrefix)),
-                detectionRange=options.getfloat("Demo", "{0}.sensor.detectionRange".format(optionPrefix)),
+                detectionRange=options.getfloat(
+                    "Demo", "{0}.sensor.detectionRange".format(optionPrefix)),
                 entityTypeFilter="fighter",
                 pDetect=options.getfloat("Demo", "{0}.sensor.pDetect".format(optionPrefix)))
 
     f.addWeaponLoadout(qty=options.getint("Demo", "{0}.weapon.qty".format(optionPrefix)),
-                       rng=options.getfloat("Demo", "{0}.weapon.rng".format(optionPrefix)),
+                       rng=options.getfloat(
+                           "Demo", "{0}.weapon.rng".format(optionPrefix)),
                        speed=options.getfloat("Demo", "{0}.weapon.speed".format(optionPrefix)))
 
     return f
@@ -92,7 +95,7 @@ class Fighter:
     def updatePosition(self, dt):
         dx = math.cos(math.radians(self.heading))
         dy = math.sin(math.radians(self.heading))
-        n = utils.normalize2dVector([dx,dy])
+        n = utils.normalize2dVector([dx, dy])
 
         self.x += n[0] * self.speed * dt
         self.y += n[1] * self.speed * dt
@@ -101,7 +104,8 @@ class Fighter:
             cmdHdgNormalized = utils.normalizeAngle(self.commandedHeading)
             curHdgNormalized = utils.normalizeAngle(self.heading)
 
-            deltaHeading = utils.computeSmallestAngleBetweenHeadings(curHdgNormalized, cmdHdgNormalized)
+            deltaHeading = utils.computeSmallestAngleBetweenHeadings(
+                curHdgNormalized, cmdHdgNormalized)
 
             if deltaHeading > self.turnRate * dt:
                 if deltaHeading < 0:
@@ -127,7 +131,8 @@ class Fighter:
             # sort targets by range to target
 
             foundPDT = False
-            self.searchResults.sort(key=lambda x: x["rangeToTarget"], reverse=False)
+            self.searchResults.sort(
+                key=lambda x: x["rangeToTarget"], reverse=False)
 
             seenTargets = list()
             for t in self.searchResults:
@@ -162,7 +167,8 @@ class Fighter:
 
         cmdHdgNormalized = utils.normalizeAngle(self.commandedHeading)
         curHdgNormalized = utils.normalizeAngle(self.heading)
-        deltaHeading = utils.computeSmallestAngleBetweenHeadings(curHdgNormalized, cmdHdgNormalized)
+        deltaHeading = utils.computeSmallestAngleBetweenHeadings(
+            curHdgNormalized, cmdHdgNormalized)
 
         if abs(deltaHeading) > self.turnRate * dt:
             if deltaHeading < 0:
@@ -181,12 +187,17 @@ class Fighter:
         if self.shotsAvailable > 0 and self.currentShotDelay == 0 and self.primaryTarget is not None:
             if self.primaryTarget["targetId"] in self.world.players:
                 tgt = self.world.players[self.primaryTarget["targetId"]]
-                hdgToTarget = utils.computeHeading(self.x, self.y, tgt.x, tgt.y)
-                hdgDiff = utils.computeSmallestAngleBetweenHeadings(self.heading, hdgToTarget)
-                if self.primaryTarget["rangeToTarget"] < self.shotRange and hdgDiff < 10: # or hdgDiff > 345):
+                hdgToTarget = utils.computeHeading(
+                    self.x, self.y, tgt.x, tgt.y)
+                hdgDiff = utils.computeSmallestAngleBetweenHeadings(
+                    self.heading, hdgToTarget)
+                # or hdgDiff > 345):
+                if self.primaryTarget["rangeToTarget"] < self.shotRange and hdgDiff < 10:
                     if self.primaryTarget["targetId"] in self.world.players:
-                        self.world.sendThoughtBubble("Firing missile from position {0},{1}".format(self.x, self.y))
-                        missile = Missile(self.force, self, self.world.players[self.primaryTarget["targetId"]], self.shotSpeed)
+                        self.world.sendThoughtBubble(
+                            "Firing missile from position {0},{1}".format(self.x, self.y))
+                        missile = Missile(
+                            self.force, self, self.world.players[self.primaryTarget["targetId"]], self.shotSpeed)
                         self.world.addWeapon(missile)
                         self.currentShotDelay = self.shotDelay
                         self.shotsAvailable -= 1
@@ -194,7 +205,7 @@ class Fighter:
     def setHeading(self, hdg):
         self.heading = hdg
 
-    def setPosition(self,x,y):
+    def setPosition(self, x, y):
         self.x = x
         self.y = y
 
@@ -204,7 +215,8 @@ class Fighter:
             sensor.world = world
 
     def addSensor(self, sweepTime, detectionRange, entityTypeFilter, pDetect):
-        self.sensors.append(Sensor(self.world, self.playerId, sweepTime, detectionRange, entityTypeFilter, pDetect, self.force))
+        self.sensors.append(Sensor(self.world, self.playerId, sweepTime,
+                                   detectionRange, entityTypeFilter, pDetect, self.force))
 
     def addWeaponLoadout(self, qty, rng, speed=100):
         self.shotsAvailable = qty
@@ -213,4 +225,3 @@ class Fighter:
 
     def setSpeed(self, speed):
         self.speed = speed
-
