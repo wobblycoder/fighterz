@@ -1,10 +1,11 @@
 import math
 import utils
 
+
 class Missile:
-    
+
     imagesByForce = dict()
-    
+
     def __init__(self, force, shooter, target, speed):
         self.force = force
         self.entityType = "missile"
@@ -18,10 +19,9 @@ class Missile:
         self.speed = speed
         self.target = target
         self.detections = []
-        self.ttl = 6 # seconds
+        self.ttl = 6  # seconds
         self.runTime = 0.0
         self.state = "ALIVE"
-
 
     def setHeading(self, angle):
         self.heading = angle
@@ -38,7 +38,7 @@ class Missile:
         # move
         dx = math.cos(math.radians(self.heading))
         dy = math.sin(math.radians(self.heading))
-        n = utils.normalize2dVector([dx,dy])
+        n = utils.normalize2dVector([dx, dy])
 
         # self.speed *= 0.999
 
@@ -49,19 +49,22 @@ class Missile:
         if self.target.state == "DEAD":
             self.commandedHeading = None
         else:
-            self.commandedHeading = utils.computeHeading(self.x, self.y, self.target.x, self.target.y)
-
+            self.commandedHeading = utils.computeHeading(self.x,
+                                                         self.y,
+                                                         self.target.x,
+                                                         self.target.y)
 
         if self.commandedHeading is not None:
-            cmdHdgNormalized = utils.normalizeAngle(self.commandedHeading)
-            curHdgNormalized = utils.normalizeAngle(self.heading)
+            cmd_hdg = utils.normalizeAngle(self.commandedHeading)
+            cur_hdg = utils.normalizeAngle(self.heading)
 
-            deltaHeading = utils.computeSmallestAngleBetweenHeadings(curHdgNormalized, cmdHdgNormalized)
+            delta_hdg = utils.computeSmallestAngleBetweenHeadings(cur_hdg,
+                                                                  cmd_hdg)
 
-            if deltaHeading > self.turnRate * dt:
-                if deltaHeading < 0:
-                    self.setHeading(curHdgNormalized - self.turnRate * dt)
+            if delta_hdg > self.turnRate * dt:
+                if delta_hdg < 0:
+                    self.setHeading(cur_hdg - self.turnRate * dt)
                 else:
-                    self.setHeading(curHdgNormalized + self.turnRate * dt)
+                    self.setHeading(cur_hdg + self.turnRate * dt)
             else:
                 self.commandedHeading = None
