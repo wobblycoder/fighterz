@@ -83,7 +83,8 @@ class Game:
             self.icon_scale = self.config.getfloat("Screen", "iconScale")
 
     def loadOptions(self):
-        self.should_draw_sensors = self.config.getboolean("Options", "drawSensors")
+        self.should_draw_sensors = self.config.getboolean("Options",
+                                                          "drawSensors")
 
     def initializeGameEngine(self):
         pygame.init()
@@ -242,15 +243,15 @@ class Game:
         has_search_results = hasattr(player, "searchResults")
 
         if has_search_results:
-            px, py = self.translate_coords(player.x, player.y)            
-            detections = filter(lambda res: res["detected"] and res["targetId"] in self.world.players, 
+            px, py = self.translate_coords(player.x, player.y)
+            detections = filter(lambda res: self.is_live_detection(res),
                                 player.searchResults)
 
             for d in detections:
                 tgt = self.world.players[d["targetId"]]
                 dx, dy = self.translate_coords(tgt.x, tgt.y)
                 pygame.draw.line(self.screen,
-                                 player.force, 
+                                 player.force,
                                  [px, py + 1],
                                  [dx, dy + 1],
                                  5)
@@ -259,17 +260,17 @@ class Game:
         """
         Highlights the currently selected player
         """
-        if self.selectedPlayer is not None and self.selectedPlayer.state != "ALIVE":
+        sp = self.selectedPlayer
+        if sp is not None and sp.state != "ALIVE":
             self.selectedPlayer = None
             return
 
-        if self.selectedPlayer is not None:
-            px, py = self.translate_coords(self.selectedPlayer.x,
-                                           self.selectedPlayer.y)
+        if sp is not None:
+            px, py = self.translate_coords(sp.x, sp.y)
             pygame.draw.circle(self.screen,
                                (0, 255, 0, 128),
                                (int(px), int(py)),
-                               int(self.selectedPlayer.image.get_width() / 2),
+                               int(sp.image.get_width() / 2),
                                2)
 
     def drawScore(self):
@@ -353,6 +354,13 @@ class Game:
                                                          y)
         return sx, sy
 
+    def is_alive(self, player_id):
+        return player_id in self.world.players
 
-game = Game()
-game.mainloop()
+    def is_live_detection(self, res):
+        return res["detected"] and self.is_alive(res["targetId"])
+
+
+if __name__ == "__main__":
+    game = Game()
+    game.mainloop()
