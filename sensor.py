@@ -25,8 +25,8 @@ class Sensor:
                     diceRoll = random.random()
                     searchResults.append({
                         "targetId": target.playerId,
-                        "heading": utils.computeHeading(parent.x, parent.y, target.x, target.y),
-                        "rangeToTarget": utils.computeDistance(parent.x, parent.y, target.x, target.y),
+                        "heading": utils.heading_between_points(parent.x, parent.y, target.x, target.y),
+                        "rangeToTarget": utils.distance(parent.x, parent.y, target.x, target.y),
                         "speedOfTarget": target.speed,
                         "diceRoll": diceRoll,
                         "pDetect": self.pDetect,

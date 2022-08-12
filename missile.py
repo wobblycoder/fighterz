@@ -38,7 +38,7 @@ class Missile:
         # move
         dx = math.cos(math.radians(self.heading))
         dy = math.sin(math.radians(self.heading))
-        n = utils.normalize2dVector([dx, dy])
+        n = utils.normalize_2d_vector([dx, dy])
 
         # self.speed *= 0.999
 
@@ -49,16 +49,16 @@ class Missile:
         if self.target.state == "DEAD":
             self.commandedHeading = None
         else:
-            self.commandedHeading = utils.computeHeading(self.x,
+            self.commandedHeading = utils.heading_between_points(self.x,
                                                          self.y,
                                                          self.target.x,
                                                          self.target.y)
 
         if self.commandedHeading is not None:
-            cmd_hdg = utils.normalizeAngle(self.commandedHeading)
-            cur_hdg = utils.normalizeAngle(self.heading)
+            cmd_hdg = utils.normalize_angle(self.commandedHeading)
+            cur_hdg = utils.normalize_angle(self.heading)
 
-            delta_hdg = utils.computeSmallestAngleBetweenHeadings(cur_hdg,
+            delta_hdg = utils.find_angle_between_headings(cur_hdg,
                                                                   cmd_hdg)
 
             if delta_hdg > self.turnRate * dt:
