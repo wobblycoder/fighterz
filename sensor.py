@@ -26,7 +26,7 @@ class Sensor:
                     searchResults.append({
                         "targetId": target.playerId,
                         "heading": utils.heading_between_points(parent.x, parent.y, target.x, target.y),
-                        "rangeToTarget": utils.distance(parent.x, parent.y, target.x, target.y),
+                        "rangeToTarget": utils.compute_distance(parent.x, parent.y, target.x, target.y),
                         "speedOfTarget": target.speed,
                         "diceRoll": diceRoll,
                         "pDetect": self.pDetect,

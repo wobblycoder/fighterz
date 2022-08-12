@@ -15,7 +15,7 @@ def find_angle_between_headings(h1, h2):
         return math.degrees(b)
 
 
-def distance(x1, y1, x2, y2):
+def compute_distance(x1, y1, x2, y2):
     """
     The standard distance formula.
     """
@@ -44,7 +44,7 @@ def normalize_angle(angle):
 
 
 def range_to_tgt(me, target):
-    return distance(me.x, me.y, target.x, target.y)
+    return compute_distance(me.x, me.y, target.x, target.y)
 
 
 def project_point(x, y, hdg, distance):

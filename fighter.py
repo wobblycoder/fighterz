@@ -150,7 +150,7 @@ class Fighter:
                         self.doPursuit(dt)
 
         # should I turn back toward the engagement zone?
-        if utils.distance(self.x, self.y, 0, 0) > math.hypot(self.world.maxX, self.world.maxY) * 0.9:
+        if utils.compute_distance(self.x, self.y, 0, 0) > math.hypot(self.world.maxX, self.world.maxY) * 0.9:
             newheading = utils.heading_between_points(self.x, self.y, 0, 0)
             newheading += random.randint(-20, 20)
             self.setHeading(newheading)

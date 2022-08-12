@@ -181,7 +181,7 @@ class Game:
         ids = list(self.world.players.keys())
         p1 = self.world.players[ids[0]]
         sx, sy = self.translate_coords(p1.x, p1.y)
-        nearestDistance = utils.distance(
+        nearestDistance = utils.compute_distance(
             eventPos[0], eventPos[1], sx, sy)
         closest = p1
         closestId = ids[0]
@@ -189,7 +189,7 @@ class Game:
         for playerId in ids[1:]:
             p = self.world.players[playerId]
             sx, sy = self.translate_coords(p.x, p.y)
-            d = utils.distance(eventPos[0], eventPos[1], sx, sy)
+            d = utils.compute_distance(eventPos[0], eventPos[1], sx, sy)
             if d < nearestDistance:
                 closest = p
                 closestId = playerId
