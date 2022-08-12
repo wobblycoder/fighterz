@@ -2,6 +2,8 @@ import configparser
 import pygame
 import sys
 
+from zmq import has
+
 from artwork import Artwork
 from colors import RED, BLUE
 from fighter import Fighter, makeDemoFighter
@@ -17,7 +19,7 @@ class Game:
         self.config = configparser.ConfigParser()
         self.done = False
         self.paused = False
-        self.draw_sensors = False
+        self.should_draw_sensors = False
         self.show_platform_info = False
         self.full_screen = False
         self.icon_scale = 1.0
@@ -53,12 +55,12 @@ class Game:
                 ticks = self.clock.tick(50)
         pygame.quit()
 
-    def draw_everything(self):
+    def draw_everything(self) -> None:
         self.drawBackground()
         self.drawFighters()
         self.drawMissiles()
         self.drawExplosions()
-        self.drawSelection()
+        self.draw_selection()
         self.drawScore()
         if self.show_platform_info:
             self.drawPlatformInfoPanel()
@@ -83,7 +85,7 @@ class Game:
             self.icon_scale = self.config.getfloat("Screen", "iconScale")
 
     def loadOptions(self):
-        self.draw_sensors = self.config.getboolean("Options", "drawSensors")
+        self.should_draw_sensors = self.config.getboolean("Options", "drawSensors")
 
     def initializeGameEngine(self):
         pygame.init()
@@ -137,12 +139,14 @@ class Game:
             blueQty = self.config.getint("Demo", "blue.qty")
 
             for i in range(redQty):
-                rf = makeDemoFighter(RED, self.config, self.world)
-                self.world.addPlayer(rf)
+                self.world.addPlayer(makeDemoFighter(RED,
+                                                     self.config,
+                                                     self.world))
 
             for j in range(blueQty):
-                bf = makeDemoFighter(BLUE, self.config, self.world)
-                self.world.addPlayer(bf)
+                self.world.addPlayer(makeDemoFighter(BLUE,
+                                                     self.config,
+                                                     self.world))
 
     def setupTest(self):
         try:
@@ -162,7 +166,7 @@ class Game:
                 if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
                     self.done = True
                 if event.key == pygame.K_s:
-                    self.draw_sensors = not self.draw_sensors
+                    self.should_draw_sensors = not self.should_draw_sensors
                 if event.key == pygame.K_r:
                     self.createGameWorld()
                     self.setupDemo()
@@ -177,7 +181,7 @@ class Game:
     def findNearestPlayer(self, eventPos):
         ids = list(self.world.players.keys())
         p1 = self.world.players[ids[0]]
-        sx, sy = self.translateWorldToScreenCoordinates(p1.x, p1.y)
+        sx, sy = self.translate_coords(p1.x, p1.y)
         nearestDistance = utils.computeDistance(
             eventPos[0], eventPos[1], sx, sy)
         closest = p1
@@ -185,7 +189,7 @@ class Game:
 
         for playerId in ids[1:]:
             p = self.world.players[playerId]
-            sx, sy = self.translateWorldToScreenCoordinates(p.x, p.y)
+            sx, sy = self.translate_coords(p.x, p.y)
             d = utils.computeDistance(eventPos[0], eventPos[1], sx, sy)
             if d < nearestDistance:
                 closest = p
@@ -220,40 +224,50 @@ class Game:
     def drawExplosion(self, explosion):
         imageName = "explosion" + str(explosion["phase"] % 9)
         image = self.art.assets[imageName]
-        px, py = self.translateWorldToScreenCoordinates(
-            explosion["x"], explosion["y"])
+        px, py = self.translate_coords(explosion["x"], explosion["y"])
         blitx = px - image.get_width() / 2
         blity = py - image.get_height() / 2
         self.screen.blit(image, [blitx, blity])
 
     def drawPlayer(self, player):
         image = player.image
-        px, py = self.translateWorldToScreenCoordinates(player.x, player.y)
+        px, py = self.translate_coords(player.x, player.y)
         blitx = px - image.get_width() / 2
         blity = py - image.get_height() / 2
-
-        if self.draw_sensors:
-            if hasattr(player, "searchResults"):
-                for detection in player.searchResults:
-                    if detection["detected"] and detection["targetId"] in self.world.players:
-
-                        dx, dy = self.translateWorldToScreenCoordinates(self.world.players[detection["targetId"]].x,
-                                                                        self.world.players[detection["targetId"]].y)
-
-                        pygame.draw.line(self.screen, player.force, [
-                                         px, py + 1], [dx, dy + 1], 5)
+        if self.should_draw_sensors:
+            self.draw_sensors(player)
 
         rotatedImage = self.rotateImage(image, player.heading)
         self.screen.blit(rotatedImage, [blitx, blity])
 
-    def drawSelection(self):
+    def draw_sensors(self, player):
+        has_search_results = hasattr(player, "searchResults")
+
+        if has_search_results:
+            px, py = self.translate_coords(player.x, player.y)            
+            detections = filter(lambda res: res["detected"] and res["targetId"] in self.world.players, 
+                                player.searchResults)
+
+            for d in detections:
+                tgt = self.world.players[d["targetId"]]
+                dx, dy = self.translate_coords(tgt.x, tgt.y)
+                pygame.draw.line(self.screen,
+                                 player.force, 
+                                 [px, py + 1],
+                                 [dx, dy + 1],
+                                 5)
+
+    def draw_selection(self):
+        """
+        Highlights the currently selected player
+        """
         if self.selectedPlayer is not None and self.selectedPlayer.state != "ALIVE":
             self.selectedPlayer = None
             return
 
         if self.selectedPlayer is not None:
-            px, py = self.translateWorldToScreenCoordinates(
-                self.selectedPlayer.x, self.selectedPlayer.y)
+            px, py = self.translate_coords(self.selectedPlayer.x,
+                                           self.selectedPlayer.y)
             pygame.draw.circle(self.screen,
                                (0, 255, 0, 128),
                                (int(px), int(py)),
@@ -326,13 +340,6 @@ class Game:
         rot_image = rot_image.subsurface(rot_rect).copy()
         return rot_image
 
-    def translateWorldToScreenCoordinates(self, x, y):
-        newX = ((x - self.world.minX) / (self.world.maxX -
-                                         self.world.minX)) * self.screen_size[0]
-        newY = self.screen_size[1] - ((y - self.world.minY) /
-                                     (self.world.maxY - self.world.minY)) * self.screen_size[1]
-        return newX, newY
-
     def computeScores(self):
         score = {RED: 0, BLUE: 0}
         for playerId in self.world.players:
@@ -340,6 +347,13 @@ class Game:
             if not p.state == "DEAD":
                 score[p.force] += 1
         return score
+
+    def translate_coords(self, x, y):
+        sx, sy = utils.translateWorldToScreenCoordinates(self.world,
+                                                         self.screen_size,
+                                                         x,
+                                                         y)
+        return sx, sy
 
 
 game = Game()
