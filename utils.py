@@ -53,7 +53,7 @@ def projectPoint(x, y, hdg, distance):
     return x2, y2
 
 
-def translateWorldToScreenCoordinates(world, screen_size, x, y) -> tuple:
+def tx_world_to_screen(x, y, world, screen_size) -> tuple:
     world_dx = world.maxX - world.minX
     world_dy = world.maxY - world.minY
     tx = ((x - world.minX) / world_dx) * screen_size[0]

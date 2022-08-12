@@ -348,10 +348,7 @@ class Game:
         return score
 
     def translate_coords(self, x, y):
-        sx, sy = utils.translateWorldToScreenCoordinates(self.world,
-                                                         self.screen_size,
-                                                         x,
-                                                         y)
+        sx, sy = utils.tx_world_to_screen(x, y, self.world, self.screen_size)
         return sx, sy
 
     def is_alive(self, player_id):
