@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# COLOR = (Red, Blue, Green, Alpha)
+# COLOR = (Red, Green, Blue, Alpha)
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
