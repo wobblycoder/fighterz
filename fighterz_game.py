@@ -2,8 +2,6 @@ import configparser
 import pygame
 import sys
 
-from zmq import has
-
 from artwork import Artwork
 from colors import RED, BLUE
 from fighter import Fighter, makeDemoFighter
