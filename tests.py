@@ -1,12 +1,11 @@
 from fighter import Fighter
-from colors import *
+from colors import BLUE, RED
 
-import random
 
 def HeadingTest():
     players = []
     x = -900
-    for h in range(0,360,15):
+    for h in range(0, 360, 15):
         p = Fighter(BLUE)
         p.setPosition(x=x, y=0)
         p.setSpeed(200)
@@ -16,6 +15,7 @@ def HeadingTest():
         x += 64
         players.append(p)
         return players
+
 
 def OneOnOnePursuit(world):
     players = []
@@ -27,7 +27,7 @@ def OneOnOnePursuit(world):
     # p.addWeaponLoadout(1, 500, 120)
 
     q = Fighter(RED)
-    q.setPosition(900,0)
+    q.setPosition(900, 0)
     q.setHeading(180)
     q.setSpeed(100)
     q.addSensor(1.5, 400.0, "fighter", 0.75)
@@ -37,11 +37,12 @@ def OneOnOnePursuit(world):
 
     return players
 
+
 def SpeedTest(world):
 
     players = []
 
-    for y in range(0,700):
+    for y in range(700):
         p = Fighter(BLUE)
         p.setPosition(-1000.0, y)
         p.setSpeed(y)
@@ -70,7 +71,7 @@ def FireHeadingTest(world):
     p.pDetect = 1.0
     p.addSensor(0.25, 750.0, "fighter", 0.75)
     # p.addWeaponLoadout(6,250,250)
-    
+
     q = Fighter(RED)
     q.setPosition(x=150, y=0)
     q.setSpeed(0)
@@ -78,19 +79,9 @@ def FireHeadingTest(world):
     q.detectRange = 250
     q.pDetect = 1.0
     q.addSensor(0.25, 750.0, "fighter", 0.75)
-    q.addWeaponLoadout(6,250,250)
+    q.addWeaponLoadout(6, 250, 250)
 
     players.append(p)
     players.append(q)
 
     return players
-
-    
-    
-    
-    
-
-
-
-
-

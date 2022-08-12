@@ -1,7 +1,6 @@
 import math
-import random
 import utils
-import copy
+
 
 class World:
     def __init__(self, mySize):
@@ -23,7 +22,7 @@ class World:
         self.logfile.close()
 
     def addExplosion(self, x, y):
-        self.explosions[self.explosionId] = {"x":x, "y":y, "phase":0}
+        self.explosions[self.explosionId] = {"x": x, "y": y, "phase": 0}
         self.explosionId += 1
 
     def addPlayer(self, p):
@@ -78,12 +77,11 @@ class World:
             if missile.state == "DEAD":
                 deadWeapons.append(missile.playerId)
 
-
         for deadPlayer in deadPlayers:
-            del(self.players[deadPlayer])
+            del self.players[deadPlayer]
 
         for deadWeapon in deadWeapons:
-            del(self.weapons[deadWeapon])
+            del self.weapons[deadWeapon]
 
         for playerId in self.players:
             player = self.players[playerId]
@@ -109,5 +107,4 @@ class World:
                 oldExplosions.append(expNum)
             explosion["phase"] += 1
         for n in oldExplosions:
-            del(self.explosions[n])
-
+            del self.explosions[n]
