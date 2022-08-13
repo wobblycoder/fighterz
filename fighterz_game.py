@@ -1,4 +1,5 @@
 import configparser
+from decimal import DivisionByZero
 import pygame
 import sys
 
@@ -275,22 +276,26 @@ class Game:
 
     def drawScore(self):
         self.currentScore = self.computeScores()
-        if self.initialScore[RED] == 0 or self.initialScore[BLUE]: return
+        
+        try:
 
-        redScore = self.currentScore[RED] / self.initialScore[RED]
-        blueScore = self.currentScore[BLUE] / self.initialScore[BLUE]
+            redScore = self.currentScore[RED] / self.initialScore[RED]
+            blueScore = self.currentScore[BLUE] / self.initialScore[BLUE]
 
-        pygame.draw.rect(self.screen, (0, 0, 0, 0), (4, 4, 214, 66))
+            pygame.draw.rect(self.screen, (0, 0, 0, 0), (4, 4, 214, 66))
 
-        pygame.draw.rect(self.screen, (225, 225, 255, 255),
-                         (10, 10, int(200 * blueScore), 22), 2)
-        pygame.draw.rect(self.screen, (0, 0, 255, 255),
-                         (12, 12, int(200 * blueScore), 22))
+            pygame.draw.rect(self.screen, (225, 225, 255, 255),
+                            (10, 10, int(200 * blueScore), 22), 2)
+            pygame.draw.rect(self.screen, (0, 0, 255, 255),
+                            (12, 12, int(200 * blueScore), 22))
 
-        pygame.draw.rect(self.screen, (225, 225, 255, 255),
-                         (10, 38, int(200 * redScore), 22), 2)
-        pygame.draw.rect(self.screen, (255, 0, 0, 255),
-                         (12, 40, int(200 * redScore), 22))
+            pygame.draw.rect(self.screen, (225, 225, 255, 255),
+                            (10, 38, int(200 * redScore), 22), 2)
+            pygame.draw.rect(self.screen, (255, 0, 0, 255),
+                            (12, 40, int(200 * redScore), 22))
+
+        except ZeroDivisionError:
+            pass
 
     def drawPlatformInfoPanel(self):
 
