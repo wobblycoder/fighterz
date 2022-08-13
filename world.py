@@ -16,7 +16,7 @@ class World:
         self.explosions = dict()
         self.explosionId = 0
 
-        self.logfile = open("thoughts.log", "w")
+        self.logfile = open("thoughts.log", "w", encoding='utf-8')
 
     def __del__(self):
         self.logfile.close()

@@ -275,6 +275,7 @@ class Game:
 
     def drawScore(self):
         self.currentScore = self.computeScores()
+        if self.initialScore[RED] == 0 or self.initialScore[BLUE]: return
 
         redScore = self.currentScore[RED] / self.initialScore[RED]
         blueScore = self.currentScore[BLUE] / self.initialScore[BLUE]

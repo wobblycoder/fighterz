@@ -1,8 +1,12 @@
+from typing import List
 from fighter import Fighter
 from colors import BLUE, RED
 
 
-def HeadingTest():
+def heading_test() -> List[Fighter]:
+    """
+    show enemy players in a ring around a friendly
+    """
     players = []
     x = -900
     for h in range(0, 360, 15):
@@ -17,7 +21,10 @@ def HeadingTest():
         return players
 
 
-def OneOnOnePursuit(world):
+def one_on_one_pursuit() -> List[Fighter]:
+    """
+    a 1v1 chase test
+    """
     players = []
     p = Fighter(BLUE)
     p.setPosition(-900.0, 0)
@@ -38,7 +45,7 @@ def OneOnOnePursuit(world):
     return players
 
 
-def SpeedTest(world):
+def speed_test() -> List[Fighter]:
 
     players = []
 
@@ -56,10 +63,10 @@ def SpeedTest(world):
         players.append(p)
         players.append(q)
 
-        return players
+    return players
 
 
-def FireHeadingTest(world):
+def fire_heading_test() -> List[Fighter]:
 
     players = []
 
@@ -73,8 +80,8 @@ def FireHeadingTest(world):
     # p.addWeaponLoadout(6,250,250)
 
     q = Fighter(RED)
-    q.setPosition(x=150, y=0)
-    q.setSpeed(0)
+    q.setPosition(x=250, y=0)
+    q.setSpeed(1)
     q.setHeading(180)
     q.detectRange = 250
     q.pDetect = 1.0
