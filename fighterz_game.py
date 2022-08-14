@@ -31,23 +31,23 @@ class Game:
         self.initialScore = dict()
         self.currentScore = dict()
 
-        self.readConfiguration()
-        self.initializeGameEngine()
-        self.loadGraphics()
-        self.createGameWorld()
+        self.read_configuration()
+        self.initialize_game_engine()
+        self.load_graphics()
+        self.create_game_world()
 
         if len(sys.argv) > 1:
-            self.setupTest()
+            self.setup_test()
         else:
-            self.setupDemo()
+            self.setup_demo()
 
     def mainloop(self):
         ticks = 0
         self.clock = pygame.time.Clock()
-        self.initialScore = self.computeScores()
+        self.initialScore = self.compute_scores()
 
         while not self.done:
-            self.handleEvents()
+            self.handle_events()
             self.draw_everything()
             if not self.paused:
                 self.world.update(ticks / 1000.0)
@@ -55,22 +55,22 @@ class Game:
         pygame.quit()
 
     def draw_everything(self) -> None:
-        self.drawBackground()
-        self.drawFighters()
-        self.drawMissiles()
-        self.drawExplosions()
+        self.draw_background()
+        self.draw_fighters()
+        self.draw_missiles()
+        self.draw_all_explosions()
         self.draw_selection()
-        self.drawScore()
-        if self.show_platform_info:
-            self.drawPlatformInfoPanel()
+        self.draw_score()
+        self.draw_platform_info_panel()
+
         pygame.display.flip()
 
-    def readConfiguration(self):
+    def read_configuration(self):
         self.config.read("fighterz.ini")
-        self.loadScreenSettings()
-        self.loadOptions()
+        self.load_screen_settings()
+        self.load_options()
 
-    def loadScreenSettings(self):
+    def load_screen_settings(self):
         if self.config.has_option("Screen", "width"):
             self.screen_size[0] = self.config.getint("Screen", "width")
 
@@ -83,11 +83,11 @@ class Game:
         if self.config.has_option("Screen", "iconScale"):
             self.icon_scale = self.config.getfloat("Screen", "iconScale")
 
-    def loadOptions(self):
+    def load_options(self):
         self.should_draw_sensors = self.config.getboolean("Options",
                                                           "drawSensors")
 
-    def initializeGameEngine(self):
+    def initialize_game_engine(self):
         pygame.init()
 
         if self.full_screen:
@@ -98,7 +98,7 @@ class Game:
 
         pygame.display.set_caption('Fighters!')
 
-    def loadGraphics(self):
+    def load_graphics(self):
         self.art = Artwork(scale=self.icon_scale,
                            screenWidth=self.screen_size[0],
                            screenHeight=self.screen_size[1])
@@ -125,12 +125,12 @@ class Game:
             RED: self.art.assets["redmissile"]
         }
 
-    def createGameWorld(self):
+    def create_game_world(self):
         maxWorldX = 1000.0
         maxWorldY = maxWorldX * self.screen_size[1] / self.screen_size[0]
         self.world = World([maxWorldX, maxWorldY])
 
-    def setupDemo(self):
+    def setup_demo(self):
 
         if (self.config.has_option("Demo", "enabled") and
                 self.config.getboolean("Demo", "enabled")):
@@ -148,17 +148,17 @@ class Game:
                                                      self.config,
                                                      self.world))
 
-    def setupTest(self):
+    def setup_test(self):
         try:
             testFunction = getattr(tests, sys.argv[-1])
             self.world.addPlayers(testFunction())
         except Exception:
             pass
 
-    def handleEvents(self):
+    def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONUP:
-                self.selectedPlayer, self.selectedId = self.findNearestPlayer(
+                self.selectedPlayer, self.selectedId = self.find_nearest_player(
                     event.pos)
             elif event.type == pygame.QUIT:
                 self.done = True
@@ -168,8 +168,8 @@ class Game:
                 if event.key == pygame.K_s:
                     self.should_draw_sensors = not self.should_draw_sensors
                 if event.key == pygame.K_r:
-                    self.createGameWorld()
-                    self.setupDemo()
+                    self.create_game_world()
+                    self.setup_demo()
 
                 if event.key in [pygame.K_p, pygame.K_SPACE]:
                     self.paused = not self.paused
@@ -178,7 +178,7 @@ class Game:
                 if event.key == pygame.K_i:
                     self.show_platform_info = not self.show_platform_info
 
-    def findNearestPlayer(self, eventPos):
+    def find_nearest_player(self, eventPos):
         ids = list(self.world.players.keys())
         p1 = self.world.players[ids[0]]
         sx, sy = self.translate_coords(p1.x, p1.y)
@@ -201,27 +201,27 @@ class Game:
 
         return None, None
 
-    def drawBackground(self):
+    def draw_background(self):
         self.screen.blit(self.art.assets["background"], [0, 0])
 
-    def drawFighters(self):
+    def draw_fighters(self):
         for playerId in self.world.players:
             player = self.world.players[playerId]
             if player.state != "DEAD":
-                self.drawPlayer(player)
+                self.draw_player(player)
 
-    def drawMissiles(self):
+    def draw_missiles(self):
         for missileId in self.world.weapons:
             missile = self.world.weapons[missileId]
             if missile.state != "DEAD":
-                self.drawPlayer(missile)
+                self.draw_player(missile)
 
-    def drawExplosions(self):
+    def draw_all_explosions(self):
         for explosionNumber in self.world.explosions:
             explosion = self.world.explosions[explosionNumber]
-            self.drawExplosion(explosion)
+            self.draw_single_explosion(explosion)
 
-    def drawExplosion(self, explosion):
+    def draw_single_explosion(self, explosion):
         imageName = "explosion" + str(explosion["phase"] % 9)
         image = self.art.assets[imageName]
         px, py = self.translate_coords(explosion["x"], explosion["y"])
@@ -229,7 +229,7 @@ class Game:
         blity = py - image.get_height() / 2
         self.screen.blit(image, [blitx, blity])
 
-    def drawPlayer(self, player):
+    def draw_player(self, player):
         image = player.image
         px, py = self.translate_coords(player.x, player.y)
         blitx = px - image.get_width() / 2
@@ -237,7 +237,7 @@ class Game:
         if self.should_draw_sensors:
             self.draw_sensors(player)
 
-        rotatedImage = self.rotateImage(image, player.heading)
+        rotatedImage = self.rotate_image(image, player.heading)
         self.screen.blit(rotatedImage, [blitx, blity])
 
     def draw_sensors(self, player):
@@ -274,8 +274,8 @@ class Game:
                                int(sp.image.get_width() / 2),
                                2)
 
-    def drawScore(self):
-        self.currentScore = self.computeScores()
+    def draw_score(self):
+        self.currentScore = self.compute_scores()
         
         try:
 
@@ -297,7 +297,9 @@ class Game:
         except ZeroDivisionError:
             pass
 
-    def drawPlatformInfoPanel(self):
+    def draw_platform_info_panel(self):
+
+        if not self.show_platform_info: return 
 
         pygame.draw.rect(self.screen, (224, 224, 224, 64), (4, 80, 400, 272))
         pygame.draw.rect(self.screen, (214, 214, 214, 64), (6, 82, 396, 268))
@@ -336,7 +338,7 @@ class Game:
             textRect.center = (202, 216)
             self.screen.blit(textSurface, textRect)
 
-    def rotateImage(self, image, angle):
+    def rotate_image(self, image, angle):
         """rotate an image while keeping its center and size"""
         orig_rect = image.get_rect()
         rot_image = pygame.transform.rotate(image, angle)
@@ -345,7 +347,7 @@ class Game:
         rot_image = rot_image.subsurface(rot_rect).copy()
         return rot_image
 
-    def computeScores(self):
+    def compute_scores(self):
         score = {RED: 0, BLUE: 0}
         for playerId in self.world.players:
             p = self.world.players[playerId]
