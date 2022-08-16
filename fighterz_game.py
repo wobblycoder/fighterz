@@ -1,5 +1,4 @@
 import configparser
-from decimal import DivisionByZero
 import pygame
 import sys
 
@@ -158,8 +157,9 @@ class Game:
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONUP:
-                self.selectedPlayer, self.selectedId = self.find_nearest_player(
-                    event.pos)
+                near_player, near_id = self.find_nearest_player(event.pos)
+                self.selectedPlayer = near_player
+                self.selectedId = near_id
             elif event.type == pygame.QUIT:
                 self.done = True
             elif event.type == pygame.KEYDOWN:
@@ -276,30 +276,38 @@ class Game:
 
     def draw_score(self):
         self.currentScore = self.compute_scores()
-        
+
         try:
 
             redScore = self.currentScore[RED] / self.initialScore[RED]
             blueScore = self.currentScore[BLUE] / self.initialScore[BLUE]
 
             pygame.draw.rect(self.screen, (0, 0, 0, 0), (4, 4, 214, 66))
+            pygame.draw.rect(self.screen,
+                             (225, 225, 255, 255),
+                             (10, 10, int(200 * blueScore), 22),
+                             2)
 
-            pygame.draw.rect(self.screen, (225, 225, 255, 255),
-                            (10, 10, int(200 * blueScore), 22), 2)
-            pygame.draw.rect(self.screen, (0, 0, 255, 255),
-                            (12, 12, int(200 * blueScore), 22))
+            pygame.draw.rect(self.screen,
+                             (0, 0, 255, 255),
+                             (12, 12, int(200 * blueScore), 22))
 
-            pygame.draw.rect(self.screen, (225, 225, 255, 255),
-                            (10, 38, int(200 * redScore), 22), 2)
-            pygame.draw.rect(self.screen, (255, 0, 0, 255),
-                            (12, 40, int(200 * redScore), 22))
+            pygame.draw.rect(self.screen,
+                             (225, 225, 255, 255),
+                             (10, 38, int(200 * redScore), 22),
+                             2)
+
+            pygame.draw.rect(self.screen,
+                             (255, 0, 0, 255),
+                             (12, 40, int(200 * redScore), 22))
 
         except ZeroDivisionError:
             pass
 
     def draw_platform_info_panel(self):
 
-        if not self.show_platform_info: return 
+        if not self.show_platform_info:
+            return
 
         pygame.draw.rect(self.screen, (224, 224, 224, 64), (4, 80, 400, 272))
         pygame.draw.rect(self.screen, (214, 214, 214, 64), (6, 82, 396, 268))

@@ -50,16 +50,15 @@ class Missile:
             self.commandedHeading = None
         else:
             self.commandedHeading = utils.heading_between_points(self.x,
-                                                         self.y,
-                                                         self.target.x,
-                                                         self.target.y)
+                                                                 self.y,
+                                                                 self.target.x,
+                                                                 self.target.y)
 
         if self.commandedHeading is not None:
             cmd_hdg = utils.normalize_angle(self.commandedHeading)
             cur_hdg = utils.normalize_angle(self.heading)
 
-            delta_hdg = utils.find_angle_between_headings(cur_hdg,
-                                                                  cmd_hdg)
+            delta_hdg = utils.find_angle_between_headings(cur_hdg, cmd_hdg)
 
             if delta_hdg > self.turnRate * dt:
                 if delta_hdg < 0:

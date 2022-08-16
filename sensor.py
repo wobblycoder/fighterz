@@ -4,7 +4,14 @@ import utils
 
 
 class Sensor:
-    def __init__(self, world, parentId, sweepTime, detectionRange, entityTypeFilter, pDetect, myForce):
+    def __init__(self,
+                 world,
+                 parentId,
+                 sweepTime,
+                 detectionRange,
+                 entityTypeFilter,
+                 pDetect,
+                 myForce):
         self.world = world
         self.parentId = parentId
         self.baseSweepTime = sweepTime
@@ -21,12 +28,19 @@ class Sensor:
             possibleTargets = self.world.findPlayersInRange(
                 parent, self.detectionRange)
             for target in possibleTargets:
-                if (target.entityType == self.entityTypeFilter and target.force != self.myForce):
+                if target.entityType == self.entityTypeFilter and \
+                  target.force != self.myForce:
                     diceRoll = random.random()
                     searchResults.append({
                         "targetId": target.playerId,
-                        "heading": utils.heading_between_points(parent.x, parent.y, target.x, target.y),
-                        "rangeToTarget": utils.compute_distance(parent.x, parent.y, target.x, target.y),
+                        "heading": utils.heading_between_points(parent.x,
+                                                                parent.y,
+                                                                target.x,
+                                                                target.y),
+                        "rangeToTarget": utils.compute_distance(parent.x,
+                                                                parent.y,
+                                                                target.x,
+                                                                target.y),
                         "speedOfTarget": target.speed,
                         "diceRoll": diceRoll,
                         "pDetect": self.pDetect,

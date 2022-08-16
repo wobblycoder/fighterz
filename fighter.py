@@ -36,18 +36,35 @@ def makeDemoFighter(force, options, world):
 
     f.setHeading(h)
 
-    f.turnRate = options.getint("Demo", "{0}.turnRate".format(optionPrefix))
+    f.turnRate = options.getint(
+        "Demo", "{0}.turnRate".format(optionPrefix))
 
-    f.addSensor(sweepTime=options.getfloat("Demo", "{0}.sensor.sweepTime".format(optionPrefix)),
-                detectionRange=options.getfloat(
-                    "Demo", "{0}.sensor.detectionRange".format(optionPrefix)),
+    sweep_time = options.getfloat(
+        "Demo", "{0}.sensor.sweepTime".format(optionPrefix))
+
+    detection_range = options.getfloat(
+        "Demo", "{0}.sensor.detectionRange".format(optionPrefix))
+
+    p_detect = options.getfloat(
+        "Demo", "{0}.sensor.pDetect".format(optionPrefix))
+
+    f.addSensor(sweepTime=sweep_time,
+                detectionRange=detection_range,
                 entityTypeFilter="fighter",
-                pDetect=options.getfloat("Demo", "{0}.sensor.pDetect".format(optionPrefix)))
+                pDetect=p_detect)
 
-    f.addWeaponLoadout(qty=options.getint("Demo", "{0}.weapon.qty".format(optionPrefix)),
-                       rng=options.getfloat(
-                           "Demo", "{0}.weapon.rng".format(optionPrefix)),
-                       speed=options.getfloat("Demo", "{0}.weapon.speed".format(optionPrefix)))
+    weapon_qty = options.getint(
+        "Demo", "{0}.weapon.qty".format(optionPrefix))
+
+    weapon_range = options.getfloat(
+        "Demo", "{0}.weapon.rng".format(optionPrefix))
+
+    weapon_speed = options.getfloat(
+        "Demo", "{0}.weapon.speed".format(optionPrefix))
+
+    f.addWeaponLoadout(qty=weapon_qty,
+                       rng=weapon_range,
+                       speed=weapon_speed)
 
     return f
 
@@ -150,7 +167,9 @@ class Fighter:
                         self.doPursuit(dt)
 
         # should I turn back toward the engagement zone?
-        if utils.compute_distance(self.x, self.y, 0, 0) > math.hypot(self.world.maxX, self.world.maxY) * 0.9:
+        dist_from_center = utils.compute_distance(self.x, self.y, 0, 0)
+        world_diag_dist = math.hypot(self.world.maxX, self.world.maxY)
+        if dist_from_center > world_diag_dist * 0.9:
             newheading = utils.heading_between_points(self.x, self.y, 0, 0)
             newheading += random.randint(-20, 20)
             self.setHeading(newheading)
@@ -179,12 +198,17 @@ class Fighter:
             self.setHeading(cmdHdgNormalized)
             self.setSpeed(self.primaryTarget["speedOfTarget"])
 
-        if self.primaryTarget["rangeToTarget"] < self.shotRange and abs(deltaHeading) < 10:
+        in_shot_range = self.primaryTarget["rangeToTarget"] < self.shotRange
+        if in_shot_range and abs(deltaHeading) < 10:
             self.mode = "FIRE"
             self.doFire(dt)
 
     def doFire(self, dt):
-        if self.shotsAvailable > 0 and self.currentShotDelay == 0 and self.primaryTarget is not None:
+        have_weapons = self.shotsAvailable > 0
+        ready_to_fire = self.currentShotDelay == 0
+        have_tgt = self.primaryTarget is not None
+
+        if have_weapons and ready_to_fire and have_tgt:
             if self.primaryTarget["targetId"] in self.world.players:
                 tgt = self.world.players[self.primaryTarget["targetId"]]
                 hdgToTarget = utils.heading_between_points(
@@ -192,12 +216,18 @@ class Fighter:
                 hdgDiff = utils.find_angle_between_headings(
                     self.heading, hdgToTarget)
                 # or hdgDiff > 345):
-                if self.primaryTarget["rangeToTarget"] < self.shotRange and hdgDiff < 10:
+                if hdgDiff < 10:
                     if self.primaryTarget["targetId"] in self.world.players:
                         self.world.sendThoughtBubble(
-                            "Firing missile from position {0},{1}".format(self.x, self.y))
+                            "Firing missile from position {0},{1}".format(
+                                self.x, self.y))
+
                         missile = Missile(
-                            self.force, self, self.world.players[self.primaryTarget["targetId"]], self.shotSpeed)
+                            self.force,
+                            self,
+                            self.world.players[self.primaryTarget["targetId"]],
+                            self.shotSpeed)
+
                         self.world.addWeapon(missile)
                         self.currentShotDelay = self.shotDelay
                         self.shotsAvailable -= 1
@@ -215,8 +245,13 @@ class Fighter:
             sensor.world = world
 
     def addSensor(self, sweepTime, detectionRange, entityTypeFilter, pDetect):
-        self.sensors.append(Sensor(self.world, self.playerId, sweepTime,
-                                   detectionRange, entityTypeFilter, pDetect, self.force))
+        self.sensors.append(Sensor(self.world,
+                                   self.playerId,
+                                   sweepTime,
+                                   detectionRange,
+                                   entityTypeFilter,
+                                   pDetect,
+                                   self.force))
 
     def addWeaponLoadout(self, qty, rng, speed=100):
         self.shotsAvailable = qty
