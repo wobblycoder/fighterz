@@ -282,7 +282,10 @@ class Game:
             redScore = self.currentScore[RED] / self.initialScore[RED]
             blueScore = self.currentScore[BLUE] / self.initialScore[BLUE]
 
-            pygame.draw.rect(self.screen, (0, 0, 0, 0), (4, 4, 214, 66))
+            pygame.draw.rect(self.screen,
+                             (0, 0, 0, 0),
+                             (4, 4, 214, 66))
+
             pygame.draw.rect(self.screen,
                              (225, 225, 255, 255),
                              (10, 10, int(200 * blueScore), 22),
