@@ -1,7 +1,7 @@
 # fighterz
 
 A simple simulation of fighter planes suitable as an introduction to modeling and simulation (or game programming) intended
-for use as a teaching tool.
+for use as a teaching tool (especially for Jr. High and High School career day presentations.)
 
 The code uses the pygame library, in addition to the baseline Python 3.
 
