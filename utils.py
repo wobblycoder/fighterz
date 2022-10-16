@@ -19,7 +19,7 @@ def compute_distance(x1, y1, x2, y2):
     """
     The standard distance formula.
     """
-    return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
+    return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 
 def heading_between_points(x1, y1, x2, y2):
