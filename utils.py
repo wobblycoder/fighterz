@@ -16,9 +16,7 @@ def find_angle_between_headings(h1, h2):
 
 
 def compute_distance(x1, y1, x2, y2):
-    """
-    The standard distance formula.
-    """
+
     return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
 
