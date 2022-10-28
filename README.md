@@ -6,3 +6,5 @@ for use as a teaching tool (especially for Jr. High and High School career day p
 The code uses the pygame library, in addition to the baseline Python 3.
 
 I used the free versions of Python, Pygame, VsCode, PyCharm and Anaconda for my development environment, and the Piskel website to create the sprites for the moving platforms.  The background image was obtained from a free game art repository.
+
+Questions?  Contact me at spindler.c@gmail.com 
